@@ -21,16 +21,17 @@
 
 #include <QtWidgets/QWizard>
 
-class WbLineEdit;
 class WbNode;
 class QCheckBox;
 class QLabel;
+class QLineEdit;
+class QPlainTextEdit;
 
 class WbNewProtoWizard : public QWizard {
   Q_OBJECT
 
 public:
-  enum { INTRO, NAME, CONCLUSION };
+  enum { INTRO, NAME, HEADER, CONCLUSION };
 
   explicit WbNewProtoWizard(WbNode *node, QWidget *parent = NULL);
 
@@ -43,7 +44,11 @@ public:
 private:
   bool mNeedsEdit;
 
-  WbLineEdit *mFilenameEdit;
+  QLineEdit *mFilenameEdit;
+  QLineEdit *mLicenseEdit;
+  QLineEdit *mLicenseUrlEdit;
+  QLineEdit *mDocumentationUrlEdit;
+  QPlainTextEdit *mDescriptionTextEdit;
   QLabel *mFileNameWarning;
   QCheckBox *mEditCheckBox;
 
@@ -54,6 +59,7 @@ private:
   bool validateFilename();
   QWizardPage *createIntroPage();
   QWizardPage *createNamePage();
+  QWizardPage *createHeaderPage();
   QWizardPage *createConclusionPage();
 };
 

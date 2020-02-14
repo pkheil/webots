@@ -14,15 +14,19 @@
 
 #include "WbNewProtoWizard.hpp"
 
-#include "WbLineEdit.hpp"
+#include "WbApplicationInfo.hpp"
 #include "WbNode.hpp"
 #include "WbProject.hpp"
+#include "WbVersion.hpp"
 #include "WbVrmlWriter.hpp"
 
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QFileDialog>
+#include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWizardPage>
@@ -32,6 +36,7 @@ WbNewProtoWizard::WbNewProtoWizard(WbNode *node, QWidget *parent) : QWizard(pare
   mNeedsEdit = false;
   setPage(INTRO, createIntroPage());
   setPage(NAME, createNamePage());
+  setPage(HEADER, createHeaderPage());
   setPage(CONCLUSION, createConclusionPage());
   setOption(QWizard::NoCancelButton, false);
   setOption(QWizard::CancelButtonOnLeft, true);
@@ -55,10 +60,26 @@ void WbNewProtoWizard::accept() {
   const QString filename = mFilenameEdit->text();
   QFile file(filename);
   if (file.open(QIODevice::WriteOnly)) {
+    const QFileInfo fileInfo(file.fileName());
     WbVrmlWriter writer(&file, filename);
+    writer << "#VRML_SIM " << WbApplicationInfo::version().toString(false) << " utf8\n";
+    if (!mLicenseEdit->text().isEmpty())
+      writer << "# license: " << mLicenseEdit->text() << "\n";
+    if (!mLicenseUrlEdit->text().isEmpty())
+      writer << "# license url: " << mLicenseUrlEdit->text() << "\n";
+    if (!mDocumentationUrlEdit->text().isEmpty())
+      writer << "# documentation url: " << mDocumentationUrlEdit->text() << "\n";
+    foreach (const QString line, mDescriptionTextEdit->toPlainText().split('\n'))
+      writer << "# " << line << "\n";
+    writer << "\nPROTO " << fileInfo.fileName().split(".", QString::SkipEmptyParts).at(0) << " [\n";
+    writer << "]\n";
+    writer << "{\n  ";
+    writer.increaseIndent();
     writer.writeHeader(filename);
     mNode->write(writer);
     writer.writeFooter();
+    writer.decreaseIndent();
+    writer << "\n}\n";
     file.close();
   }
 
@@ -102,18 +123,47 @@ QWizardPage *WbNewProtoWizard::createNamePage() {
   page->setTitle(tr("File selection"));
   page->setSubTitle(tr("Please choose a filename for your PROTO:"));
 
-  mFilenameEdit = new WbLineEdit(page);
+  mFilenameEdit = new QLineEdit(page);
   QPushButton *chooseButton = new QPushButton(tr("Choose"), page);
   connect(chooseButton, &QPushButton::pressed, this, &WbNewProtoWizard::chooseFilename);
 
   mFileNameWarning = new QLabel(page);
 
   QVBoxLayout *vLayout = new QVBoxLayout(page);
-  QHBoxLayout *hLayout = new QHBoxLayout(page);
+  QHBoxLayout *hLayout = new QHBoxLayout();
   hLayout->addWidget(mFilenameEdit);
   hLayout->addWidget(chooseButton);
   vLayout->addLayout(hLayout);
   vLayout->addWidget(mFileNameWarning);
+
+  return page;
+}
+
+QWizardPage *WbNewProtoWizard::createHeaderPage() {
+  QWizardPage *page = new QWizardPage(this);
+  page->setTitle(tr("PROTO Header"));
+  page->setSubTitle(tr("Define the header information of the PROTO."));
+
+  QLabel *licenseLabel = new QLabel(tr("License"), page);
+  mLicenseEdit = new QLineEdit("Apache License 2.0", page);
+  QLabel *licenseUrlLabel = new QLabel(tr("License url"), page);
+  mLicenseUrlEdit = new QLineEdit("http://www.apache.org/licenses/LICENSE-2.0", page);
+  QLabel *documentationUrlLabel = new QLabel(tr("Documentation url:"), page);
+  mDocumentationUrlEdit = new QLineEdit(page);
+
+  QLabel *descriptionLabel = new QLabel(tr("PROTO description:"), page);
+  mDescriptionTextEdit = new QPlainTextEdit(tr("Simulation model of ..."));
+  mDescriptionTextEdit->setTextInteractionFlags(Qt::TextInteractionFlag::TextEditorInteraction);
+
+  QGridLayout *layout = new QGridLayout(page);
+  layout->addWidget(licenseLabel, 0, 0);
+  layout->addWidget(mLicenseEdit, 0, 1);
+  layout->addWidget(licenseUrlLabel, 1, 0);
+  layout->addWidget(mLicenseUrlEdit, 1, 1);
+  layout->addWidget(documentationUrlLabel, 2, 0);
+  layout->addWidget(mDocumentationUrlEdit, 2, 1);
+  layout->addWidget(descriptionLabel, 3, 0);
+  layout->addWidget(mDescriptionTextEdit, 4, 0, 1, 2);
 
   return page;
 }
