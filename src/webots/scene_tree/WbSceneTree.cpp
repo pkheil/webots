@@ -30,6 +30,7 @@
 #include "WbMFNode.hpp"
 #include "WbMFVector3.hpp"
 #include "WbMessageBox.hpp"
+#include "WbNewProtoWizard.hpp"
 #include "WbNodeOperations.hpp"
 #include "WbNodeUtilities.hpp"
 #include "WbPhysics.hpp"
@@ -1489,25 +1490,13 @@ void WbSceneTree::createProtoFromNode() {
   // Fix for Qt 5.3.0 that does not work correctly on Ubuntu
   // if dialog parent widget is not a top level widget
   QWidget *topLevelWidget = this;
-  while (topLevelWidget->parentWidget()) {
+  while (topLevelWidget->parentWidget())
     topLevelWidget = topLevelWidget->parentWidget();
-  }
 
-  const QString fileName = QFileDialog::getSaveFileName(topLevelWidget, tr("Create a PROTO file from this node"),
-                                                        WbProject::current()->protosPath(), tr("PROTO (*.proto)"));
+  WbNewProtoWizard wizard(mSelectedItem->node(), topLevelWidget);
+  wizard.exec();
 
-  if (fileName.isEmpty())
-    return;
-
-  QFile file(fileName);
-  if (!file.open(QIODevice::WriteOnly))
-    return;
-
-  WbVrmlWriter writer(&file, fileName);
-  writer.writeHeader(fileName);
-  mSelectedItem->node()->write(writer);
-  writer.writeFooter();
-  file.close();
+  // TODO: edit
 }
 
 void WbSceneTree::openProtoInTextEditor() {
