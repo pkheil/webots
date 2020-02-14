@@ -967,6 +967,12 @@ void WbActionManager::populateActions() {
   action->setToolTip(action->statusTip());
   mActions[EXPORT_NODE] = action;
 
+  action = new QAction(this);
+  action->setText(tr("&Create PROTO"));
+  action->setStatusTip(tr("Create a PROTO file from this node."));
+  action->setToolTip(action->statusTip());
+  mActions[CREATE_PROTO] = action;
+
   /* PROTO ACTIONS */
 
   action = new QAction(this);

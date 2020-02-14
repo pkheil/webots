@@ -99,6 +99,7 @@ private slots:
 
   void help();
   void exportObject();
+  void createProtoFromNode();
   void openProtoInTextEditor();
   void openTemplateInstanceInTextEditor();
 

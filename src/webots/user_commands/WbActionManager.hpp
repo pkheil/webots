@@ -134,6 +134,7 @@ public:
     OPEN_HELP,
     RESET_VALUE,
     EXPORT_NODE,
+    CREATE_PROTO,
     // PROTO actions
     SHOW_PROTO_SOURCE,
     SHOW_PROTO_RESULT,

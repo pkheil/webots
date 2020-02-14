@@ -128,8 +128,11 @@ namespace WbContextMenuGenerator {
 
         contextMenu.addSeparator();
 
-        if (!(selectedNode->nodeType() == WB_NODE_WORLD_INFO || selectedNode->nodeType() == WB_NODE_VIEWPOINT))
+        if (!(selectedNode->nodeType() == WB_NODE_WORLD_INFO || selectedNode->nodeType() == WB_NODE_VIEWPOINT)) {
           contextMenu.addAction(WbActionManager::instance()->action(WbActionManager::EXPORT_NODE));
+          if (!gAreProtoActionsEnabled)
+            contextMenu.addAction(WbActionManager::instance()->action(WbActionManager::CREATE_PROTO));
+        }
 
         if (!gAreProtoActionsEnabled) {
           subMenu = contextMenu.addMenu(QObject::tr("Transform To..."));

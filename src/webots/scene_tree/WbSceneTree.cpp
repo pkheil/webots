@@ -129,6 +129,7 @@ WbSceneTree::WbSceneTree(QWidget *parent) :
   connect(mActionManager->action(WbActionManager::SHOW_PROTO_RESULT), &QAction::triggered, this,
           &WbSceneTree::openTemplateInstanceInTextEditor);
   connect(mActionManager->action(WbActionManager::EXPORT_NODE), &QAction::triggered, this, &WbSceneTree::exportObject);
+  connect(mActionManager->action(WbActionManager::CREATE_PROTO), &QAction::triggered, this, &WbSceneTree::createProtoFromNode);
   connect(WbUndoStack::instance(), &WbUndoStack::changed, this, &WbSceneTree::updateValue);
 
   connect(WbTemplateManager::instance(), &WbTemplateManager::preNodeRegeneration, this, &WbSceneTree::prepareNodeRegeneration);
@@ -1478,6 +1479,34 @@ void WbSceneTree::exportObject() {
   mSelectedItem->node()->write(writer);
   writer.writeFooter();
   WbNode::disableDefNodeTrackInWrite();
+  file.close();
+}
+
+void WbSceneTree::createProtoFromNode() {
+  if (!mSelectedItem || !mSelectedItem->node())
+    return;
+
+  // Fix for Qt 5.3.0 that does not work correctly on Ubuntu
+  // if dialog parent widget is not a top level widget
+  QWidget *topLevelWidget = this;
+  while (topLevelWidget->parentWidget()) {
+    topLevelWidget = topLevelWidget->parentWidget();
+  }
+
+  const QString fileName = QFileDialog::getSaveFileName(topLevelWidget, tr("Create a PROTO file from this node"),
+                                                        WbProject::current()->protosPath(), tr("PROTO (*.proto)"));
+
+  if (fileName.isEmpty())
+    return;
+
+  QFile file(fileName);
+  if (!file.open(QIODevice::WriteOnly))
+    return;
+
+  WbVrmlWriter writer(&file, fileName);
+  writer.writeHeader(fileName);
+  mSelectedItem->node()->write(writer);
+  writer.writeFooter();
   file.close();
 }
 
