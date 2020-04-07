@@ -289,5 +289,6 @@ jobs:
       addons: *mac_addons
       before_install: *mac_before_install
       script:
+        - python3.8
         - make distrib -j2
         - if [[ "$(ls -l distribution | grep -v ^l | wc -l)" -ne "3" ]]; then echo Wrong number of files in the distribution folder; exit -1; fi  # make sure all the required file are generated
