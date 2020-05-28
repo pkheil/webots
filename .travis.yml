@@ -141,7 +141,7 @@ jobs:
         - python tests/test_suite.py --no-ansi-escape --nomake
         - ./tests/ros.sh
     - <<: *unit_tests_staging
-      name: Ubuntu 18.04 / Python 3.8 / openjdk 11 / ROS melodic
+      name: Ubuntu 18.04 / Python 3.8 / openjdk 11 / ROS noetic
       dist: bionic
       jdk: openjdk11
       before_install:
@@ -150,7 +150,7 @@ jobs:
         - sudo apt install -y python3.8-dev
         - export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
         - export PATH=$JAVA_HOME/bin:$PATH
-        - export ROS_DISTRO=melodic
+        - export ROS_DISTRO=noetic
         - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
         - sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
         - sudo apt update -qq
@@ -158,7 +158,6 @@ jobs:
         - sudo apt-get install -y python-rosdep
         - sudo rosdep init
         - rosdep update
-        - pip install rospkg catkin_pkg empy defusedxml netifaces  # by default ros only comes with python2.7 libraries
       addons: &bionic_apt_packages
         apt:
           packages:
@@ -191,10 +190,6 @@ jobs:
             - fakeroot
             - pbzip2
             - libxkbcommon-x11-dev
-      script:  # TODO: remove this part once ROS melodic is fixed to restore the ROS test.
-        - make release -j2
-        - make release -j2 -C tests
-        - python tests/test_suite.py --no-ansi-escape --nomake
     - &distribution_staging
       stage: Distribution
       if: type = cron OR commit_message IN (travis_distrib, travis_distrib_only) OR (NOT tag =~ ^nightly_ AND tag IS present)
