@@ -88,7 +88,7 @@ int main() {
       // printf("coords for robot %d: %g %g %g\n",i,robot_translation[i][0],robot_translation[i][1],robot_translation[i][2]);
       packet[3 * i] = robot_translation[i][0];      // robot i: X
       packet[3 * i + 1] = robot_translation[i][2];  // robot i: Z
-
+      robot_rotation[i] = wb_supervisor_field_get_sf_rotation(robot_rotation_field[i]); // update the rotations
       if (robot_rotation[i][1] > 0)                // robot i: rotation Ry axis
         packet[3 * i + 2] = robot_rotation[i][3];  // robot i: alpha
       else                                         // Ry axis was inverted
